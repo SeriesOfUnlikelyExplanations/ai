@@ -1,6 +1,6 @@
 from sagemaker.huggingface.model import HuggingFaceModel, HuggingFacePredictor
 from sagemaker.huggingface import get_huggingface_llm_image_uri
-import boto3, sys, sagemaker, json
+import boto3, sys, sagemaker, json, requests
 
 iam_client = boto3.client('iam')
 role = iam_client.get_role(RoleName='AmazonSageMaker-ExecutionRole-20231214T132659')['Role']['Arn']

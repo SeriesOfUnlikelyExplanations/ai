@@ -9,7 +9,7 @@ cloudpickle==2.2.1
 colorama==0.4.4
 command-not-found==0.3
 contextlib2==21.6.0
-cryptography==3.4.8
+cryptography==41.0.6
 dbus-python==1.2.18
 dill==0.3.7
 distro==1.7.0

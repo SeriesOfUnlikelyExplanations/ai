@@ -1,2 +1,3 @@
 #Stuff for this project
-alias ai='cd ~/workspace/AI && v'
+alias ai='cd ~/workspace/ai && venvStart'
+alias sage='py sageChat.py'

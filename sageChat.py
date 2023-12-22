@@ -38,7 +38,7 @@ def main(cmd):
 def createPredictor():
   # Hub model configuration <https://huggingface.co/models>
   hub = {
-    'HF_MODEL_ID':'TheBloke/Wizard-Vicuna-13B-Uncensored-HF',
+    'HF_MODEL_ID':'cognitivecomputations/WizardLM-13B-Uncensored',
     'SM_NUM_GPUS': json.dumps(1)
   }
   # create Hugging Face Model Class

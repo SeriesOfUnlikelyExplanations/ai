@@ -1,13 +1,19 @@
-from sagemaker.huggingface.model import HuggingFaceModel, HuggingFacePredictor
-from sagemaker.huggingface import get_huggingface_llm_image_uri
-import boto3, sys, sagemaker, json, requests
-
+# ~ from sagemaker.huggingface.model import HuggingFaceModel, HuggingFacePredictor
+# ~ from sagemaker.huggingface import get_huggingface_llm_image_uri
+import boto3, sys, torch, json, requests #sagemaker
+from huggingface_hub import snapshot_download
+from transformers import AutoModelForCausalLM, AutoTokenizer
+      
 iam_client = boto3.client('iam')
 role = iam_client.get_role(RoleName='AmazonSageMaker-ExecutionRole-20231214T132659')['Role']['Arn']
-sess = sagemaker.Session()
+# ~ sess = sagemaker.Session()
 
 sagemaker_client = boto3.client('sagemaker');
 
+model = 'TheBloke/Chronos-Hermes-13b-v2-GGUF'
+# Austism/chronos-hermes-13b-v2
+# mindrage/Manticore-13B-Chat-Pyg-Guanaco-GGML
+# mistralai/Mistral-7B-Instruct-v0.2
 # ~ https://huggingface.co/blog/sagemaker-huggingface-llm
 
 def main(cmd):
@@ -21,6 +27,9 @@ def main(cmd):
       print("Running the prediction...")
       response = runPredictor()
       print(response)
+    case "download":
+      snapshot_download(repo_id=model, local_dir="models/"+model,
+        local_dir_use_symlinks=False, revision="main")
     case "cleanup":
       print("Deleting the endpoints..")
       response = deleteEndpoint('all')
@@ -32,13 +41,34 @@ def main(cmd):
       response =  deleteModel('all')
       print(response)
       delete_log_streams(prefix='/aws/sagemaker/Endpoints')
+    case 'chat':
+      model_load = AutoModelForCausalLM.from_pretrained("./models/"+model+'/', 
+        torch_dtype=torch.bfloat16, 
+        low_cpu_mem_usage=True)
+      
+      tokenizer = AutoTokenizer.from_pretrained("./models/"+model+'/')
+      model_load.to('cpu').eval();
+
+      # Let's chat for 10 lines
+      for step in range(10):
+          # encode the new user input, add the eos_token and return a tensor in Pytorch
+          new_user_input_ids = tokenizer.encode(tokenizer.eos_token + input(">> User:"), return_tensors='pt')
+
+          # append the new user input tokens to the chat history
+          bot_input_ids = torch.cat([chat_history_ids, new_user_input_ids], dim=-1) if step > 0 else new_user_input_ids
+
+          # generated a response while limiting the total chat history to 1000 tokens, 
+          chat_history_ids = model_load.generate(bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id)
+          # pretty print last ouput tokens from bot
+          print("Bot: {}".format(tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)))
+
     case _:
       print("unsupported command given")
       
 def createPredictor():
   # Hub model configuration <https://huggingface.co/models>
   hub = {
-    'HF_MODEL_ID':'cognitivecomputations/WizardLM-13B-Uncensored',
+    'HF_MODEL_ID':model,
     'SM_NUM_GPUS': json.dumps(1)
   }
   # create Hugging Face Model Class

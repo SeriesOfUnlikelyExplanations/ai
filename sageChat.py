@@ -1,6 +1,4 @@
-# ~ from sagemaker.huggingface.model import HuggingFaceModel, HuggingFacePredictor
-# ~ from sagemaker.huggingface import get_huggingface_llm_image_uri
-import boto3, sys, torch, json, requests #sagemaker
+import boto3, sys, torch, json, requests
 from huggingface_hub import snapshot_download
 from transformers import AutoModelForCausalLM, AutoTokenizer
       
@@ -14,7 +12,8 @@ model = 'TheBloke/Chronos-Hermes-13b-v2-GGUF'
 # Austism/chronos-hermes-13b-v2
 # mindrage/Manticore-13B-Chat-Pyg-Guanaco-GGML
 # mistralai/Mistral-7B-Instruct-v0.2
-# ~ https://huggingface.co/blog/sagemaker-huggingface-llm
+# mistralai/Mixtral-8x7B-v0.1
+# TheBloke/Mixtral-8x7B-v0.1-GGUF
 
 def main(cmd):
   match cmd:

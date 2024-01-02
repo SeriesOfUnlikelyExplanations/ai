@@ -19,4 +19,8 @@ Content-Disposition: attachment; filename="userdata.txt"
 
 #!/bin/bash
 /bin/echo "Hello World" >> /tmp/userdata-test.txt
+sudo apt install git nvidia-cuda-toolkit
+CMAKE_ARGS="-DLLAMA_CUBLAS=on" 
+FORCE_CMAKE=1
+
 --//

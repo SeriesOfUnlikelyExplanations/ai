@@ -36,11 +36,9 @@ export class AIStack extends cdk.Stack {
       instanceName: 'ai-instance',
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.G4DN,
-        ec2.InstanceSize.XLARGE2
+        ec2.InstanceSize.XLARGE
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2(),
 
       keyName: 'ai-key', // we will create this in the console before we deploy
     })

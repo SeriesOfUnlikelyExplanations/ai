@@ -18,5 +18,5 @@ Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename="userdata.txt"
 
 #!/bin/bash
-/bin/echo "Hello World" >> /tmp/userdata-test.txt
+
 --//

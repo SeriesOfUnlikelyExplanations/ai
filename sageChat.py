@@ -1,6 +1,7 @@
 import boto3, sys, torch, json, requests
 from huggingface_hub import snapshot_download
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from llama_cpp import Llama
       
 iam_client = boto3.client('iam')
 role = iam_client.get_role(RoleName='AmazonSageMaker-ExecutionRole-20231214T132659')['Role']['Arn']
@@ -41,25 +42,36 @@ def main(cmd):
       print(response)
       delete_log_streams(prefix='/aws/sagemaker/Endpoints')
     case 'chat':
-      model_load = AutoModelForCausalLM.from_pretrained("./models/"+model+'/', 
-        torch_dtype=torch.bfloat16, 
-        low_cpu_mem_usage=True)
+      llm = Llama(model_path="models/"+model+"/chronos-hermes-13b-v2.Q4_K_M.gguf", chat_format="llama-2")
+      response = llm.create_chat_completion(
+        messages = [
+          {"role": "system", "content": "You are an assistant who perfectly describes penises."},
+          {
+            "role": "user",
+            "content": "Describe my penis in detail please."
+          }
+        ]
+      )
+      print(response)
+      # ~ model_load = AutoModelForCausalLM.from_pretrained("./models/"+model+'/', 
+        # ~ torch_dtype=torch.bfloat16, 
+        # ~ low_cpu_mem_usage=True)
       
-      tokenizer = AutoTokenizer.from_pretrained("./models/"+model+'/')
-      model_load.to('cpu').eval();
+      # ~ tokenizer = AutoTokenizer.from_pretrained("./models/"+model+'/')
+      # ~ model_load.to('cpu').eval();
 
-      # Let's chat for 10 lines
-      for step in range(10):
-          # encode the new user input, add the eos_token and return a tensor in Pytorch
-          new_user_input_ids = tokenizer.encode(tokenizer.eos_token + input(">> User:"), return_tensors='pt')
+      # ~ # Let's chat for 10 lines
+      # ~ for step in range(10):
+          # ~ # encode the new user input, add the eos_token and return a tensor in Pytorch
+          # ~ new_user_input_ids = tokenizer.encode(tokenizer.eos_token + input(">> User:"), return_tensors='pt')
 
-          # append the new user input tokens to the chat history
-          bot_input_ids = torch.cat([chat_history_ids, new_user_input_ids], dim=-1) if step > 0 else new_user_input_ids
+          # ~ # append the new user input tokens to the chat history
+          # ~ bot_input_ids = torch.cat([chat_history_ids, new_user_input_ids], dim=-1) if step > 0 else new_user_input_ids
 
-          # generated a response while limiting the total chat history to 1000 tokens, 
-          chat_history_ids = model_load.generate(bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id)
-          # pretty print last ouput tokens from bot
-          print("Bot: {}".format(tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)))
+          # ~ # generated a response while limiting the total chat history to 1000 tokens, 
+          # ~ chat_history_ids = model_load.generate(bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id)
+          # ~ # pretty print last ouput tokens from bot
+          # ~ print("Bot: {}".format(tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)))
 
     case _:
       print("unsupported command given")
